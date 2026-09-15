@@ -1,14 +1,13 @@
 # 1. Imaginea de bază cu Python
 FROM python:3.10-slim
 
-# 2. Instalăm dependențele de sistem și Google Chrome direct prin pachetul .deb
+# 2. Instalăm dependențele și Google Chrome corect
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
     unzip \
     gnupg \
     libxi6 \
-    libgconf-2-4 \
     libnss3 \
     && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get install -y ./google-chrome-stable_current_amd64.deb \
