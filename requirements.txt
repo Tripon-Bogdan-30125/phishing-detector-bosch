@@ -1,0 +1,11 @@
+tldextract
+python-whois
+dnspython
+requests
+beautifulsoup4
+xgboost
+shap
+streamlit
+scikit-learn
+pandas
+numpy
