@@ -3,7 +3,7 @@ import tldextract
 import difflib
 import time
 
-# Importăm Selenium - Browserul condus de Inteligența Artificială
+# Importăm Selenium 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -11,11 +11,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 class SandboxAnalyzer:
     def __init__(self):
-        # Configurăm Google Chrome să ruleze în modul "Headless" (Invizibil)
+        
+
         self.chrome_options = Options()
         self.chrome_options.add_argument("--headless") # Ascunde fereastra
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
+        # Configurăm Google Chrome să ruleze în modul "Headless" (Invizibil)
+       
         # Ne punem o "mască" de utilizator normal de Windows
         self.chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         
@@ -40,7 +43,7 @@ class SandboxAnalyzer:
             
         driver = None
         try:
-            # Pormim browserul robotizat
+            # Pormim browserul 
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service, options=self.chrome_options)
             
@@ -51,32 +54,27 @@ class SandboxAnalyzer:
             initial_ext = tldextract.extract(url)
             initial_domain = f"{initial_ext.domain}.{initial_ext.suffix}"
 
-            # 1. ACCESĂM SITE-UL (Robotul "tastează" link-ul și dă Enter)
+            
             driver.get(url)
             
-            # Pauză strategică de 2 secunde pentru a lăsa JavaScript-ul de la Facebook/Google să se încarce
             time.sleep(2)
             
-            # 2. Verificăm unde am ajuns final (Redirect)
             final_url = driver.current_url
             final_ext = tldextract.extract(final_url)
             final_domain = f"{final_ext.domain}.{final_ext.suffix}"
             
             if initial_domain != final_domain:
                 features['diff_domain_redirect'] = 1
-                features['redirect_count'] = 1 # Selenium nu dă numărul exact de pași, dar știm sigur că a sărit
+                features['redirect_count'] = 1 
                 
-            # 3. Descărcăm codul sursă DUPĂ ce a rulat JS-ul!
+            
             html_text = driver.page_source.lower()
             soup = BeautifulSoup(html_text, 'html.parser')
             
-            # 4. Căutăm câmpuri de parolă (Acum va găsi pe Facebook!)
             features['has_password_field'] = 1 if soup.find_all('input', type='password') else 0
             
-            # 5. Număr de Iframe-uri
             features['iframe_count'] = len(soup.find_all('iframe'))
-            
-            # 6. Anti-Analiză (click-dreapta blocat)
+        
             anti_analysis_keywords = ['contextmenu', 'preventdefault', 'event.button == 2']
             if any(kw in html_text for kw in anti_analysis_keywords):
                 features['has_anti_analysis_scripts'] = 1
@@ -90,10 +88,10 @@ class SandboxAnalyzer:
             features['brand_spoofing_ratio'] = max_sim if max_sim < 1.0 else 0.0
 
         except Exception as e:
-            # Dacă site-ul e mort complet
+            
             pass
         finally:
-            # Indiferent ce se întâmplă, închidem browserul ca să nu ocupăm memoria RAM
+            
             if driver:
                 driver.quit()
             
@@ -103,7 +101,6 @@ class SandboxAnalyzer:
 if __name__ == "__main__":
     analyzer = SandboxAnalyzer()
     
-    # Acum testăm inamicul principal: Facebook
     test_url = "https://www.facebook.com"
     print(f"[*] Analizez dinamic cu Robotul Selenium: {test_url}")
     print("    ... pornesc browserul invizibil (durează 3-5 secunde) ...")
