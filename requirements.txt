@@ -7,3 +7,4 @@ webdriver-manager
 shap
 python-whois
 dnspython
+matplotlib
