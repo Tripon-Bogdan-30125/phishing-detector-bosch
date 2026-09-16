@@ -3,6 +3,8 @@ import pandas as pd
 import pickle
 import shap
 import matplotlib.pyplot as plt
+import tldextract
+from urllib.parse import urlparse, urlunparse
 from motor_extragere import FeatureExtractorEngine
 
 # 1. Page Configuration
@@ -36,11 +38,36 @@ if st.button("Scan Live URL", type="primary"):
             try:
                 # Extract live vector
                 vector = motor.process_url(url_input)
-                df_features = pd.DataFrame([vector])
+                ext = tldextract.extract(url_input)
+                domeniu_complet = f"{ext.domain}.{ext.suffix}"
+                enterprise_whitelist = ['microsoft.com', 'azure.com', 'bosch.com', 'github.com', 'youtube.com', 'google.com']
+
+                if domeniu_complet in enterprise_whitelist:
+                  # Dacă e domeniu aprobat de companie, forțăm verdictul de Safe
+                            predictie = 0
+                            probabilitati = [0.99, 0.01]
+                            df_features = pd.DataFrame([vector])
+                            for col in df_features.columns:
+                                df_features[col] = 0.0
+                else:
+                # Convertim în DataFrame indiferent dacă e listă sau dicționar
+                    if isinstance(vector, list):
+                        df_features = pd.DataFrame([vector])
+                    else:
+                        df_features = pd.DataFrame([vector])
+
+                # Curățăm forțat orice text/paranteză reziduală din fiecare celulă
+                    for col in df_features.columns:
+                     df_features[col] = df_features[col].astype(str).str.replace(r'[\[\]\']', '', regex=True)
+                     df_features[col] = pd.to_numeric(df_features[col], errors='coerce').fillna(0.0)
+
+                # Dacă modelul are salvate numele caracteristicilor, le aliniem
+                    if hasattr(model, "feature_names_in_"):
+                        df_features = df_features[model.feature_names_in_]
                 
                 # AI Prediction
-                predictie = model.predict(df_features)[0]
-                probabilitati = model.predict_proba(df_features)[0]
+                    predictie = model.predict(df_features)[0]
+                    probabilitati = model.predict_proba(df_features)[0]
                 
                 st.divider()
                 
