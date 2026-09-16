@@ -17,6 +17,7 @@ class SandboxAnalyzer:
         self.chrome_options.add_argument("--headless") # Ascunde fereastra
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
+        self.chrome_options.add_argument("--window-size=1920,1080")
         # Configurăm Google Chrome să ruleze în modul "Headless" (Invizibil)
        
         # Ne punem o "mască" de utilizator normal de Windows
